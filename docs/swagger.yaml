@@ -1,0 +1,389 @@
+basePath: /api/v1
+definitions:
+  common.Response:
+    properties:
+      data: {}
+      message:
+        example: 요청이 성공적으로 처리되었습니다.
+        type: string
+      success:
+        example: true
+        type: boolean
+      timestamp:
+        example: 2026-05-11T17:20:51.8852115
+        type: string
+    type: object
+  domain.Board:
+    properties:
+      boardId:
+        type: integer
+      content:
+        type: string
+      createdAt:
+        type: string
+      title:
+        type: string
+      updatedAt:
+        type: string
+      user:
+        $ref: '#/definitions/domain.User'
+      userIdx:
+        type: integer
+    type: object
+  domain.Comment:
+    properties:
+      board:
+        $ref: '#/definitions/domain.Board'
+      boardId:
+        type: integer
+      commentId:
+        type: integer
+      content:
+        type: string
+      madeAt:
+        type: string
+      step:
+        type: integer
+      updatedAt:
+        type: string
+      user:
+        $ref: '#/definitions/domain.User'
+      userIdx:
+        type: integer
+    type: object
+  domain.User:
+    properties:
+      createdAt:
+        type: string
+      email:
+        type: string
+      lastLogin:
+        type: string
+      userId:
+        type: string
+      userIdx:
+        type: integer
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: 이 프로젝트는 Golang, Gin, GORM을 이용한 토이 프로젝트 API입니다.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Golang Toy Project API
+  version: "1.0"
+paths:
+  /boards:
+    get:
+      description: 전체 게시글 목록을 페이징하여 조회합니다.
+      parameters:
+      - description: '페이지 번호 (기본값: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: '페이지 크기 (기본값: 10)'
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 게시글 목록 조회 (Pagination)
+      tags:
+      - Board
+    post:
+      consumes:
+      - application/json
+      description: 새로운 게시글을 등록합니다.
+      parameters:
+      - description: 게시글 정보
+        in: body
+        name: board
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Board'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 게시글 등록
+      tags:
+      - Board
+  /boards/{boardId}/comments:
+    get:
+      description: 특정 게시글의 댓글 목록을 페이징하여 조회합니다.
+      parameters:
+      - description: 게시글 ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: '페이지 번호 (기본값: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: '페이지 크기 (기본값: 10)'
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 게시글별 댓글 목록 조회 (Pagination)
+      tags:
+      - Comment
+  /boards/{id}:
+    delete:
+      description: 게시글을 삭제합니다.
+      parameters:
+      - description: 게시글 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 게시글 삭제
+      tags:
+      - Board
+    get:
+      description: ID를 통해 게시글을 조회합니다.
+      parameters:
+      - description: 게시글 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 게시글 조회
+      tags:
+      - Board
+    put:
+      consumes:
+      - application/json
+      description: 게시글 정보를 수정합니다.
+      parameters:
+      - description: 게시글 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 수정할 게시글 정보
+        in: body
+        name: board
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Board'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 게시글 수정
+      tags:
+      - Board
+  /comments:
+    post:
+      consumes:
+      - application/json
+      description: 새로운 댓글을 등록합니다.
+      parameters:
+      - description: 댓글 정보
+        in: body
+        name: comment
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Comment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 댓글 등록
+      tags:
+      - Comment
+  /comments/{id}:
+    delete:
+      description: 댓글을 삭제합니다.
+      parameters:
+      - description: 댓글 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 댓글 삭제
+      tags:
+      - Comment
+    put:
+      consumes:
+      - application/json
+      description: 댓글 정보를 수정합니다.
+      parameters:
+      - description: 댓글 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 수정할 댓글 정보
+        in: body
+        name: comment
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Comment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 댓글 수정
+      tags:
+      - Comment
+  /users:
+    get:
+      description: 전체 사용자 목록을 페이징하여 조회합니다.
+      parameters:
+      - description: '페이지 번호 (기본값: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: '페이지 크기 (기본값: 10)'
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 사용자 목록 조회 (Pagination)
+      tags:
+      - User
+    post:
+      consumes:
+      - application/json
+      description: 새로운 사용자를 등록합니다.
+      parameters:
+      - description: 사용자 정보
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/domain.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 사용자 등록
+      tags:
+      - User
+  /users/{idx}:
+    delete:
+      description: 사용자를 삭제합니다.
+      parameters:
+      - description: 사용자 IDX
+        in: path
+        name: idx
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 사용자 삭제
+      tags:
+      - User
+    get:
+      description: IDX를 통해 사용자를 조회합니다.
+      parameters:
+      - description: 사용자 IDX
+        in: path
+        name: idx
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 사용자 조회
+      tags:
+      - User
+    put:
+      consumes:
+      - application/json
+      description: 사용자 정보를 수정합니다.
+      parameters:
+      - description: 사용자 IDX
+        in: path
+        name: idx
+        required: true
+        type: integer
+      - description: 수정할 사용자 정보
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/domain.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.Response'
+      summary: 사용자 정보 수정
+      tags:
+      - User
+swagger: "2.0"
