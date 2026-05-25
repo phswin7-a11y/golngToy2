@@ -57,7 +57,11 @@ func (r *repository) FindByBoardID(ctx context.Context, boardID uint, page, size
 }
 
 func (r *repository) Update(ctx context.Context, comment *domain.Comment) error {
-	if err := r.db.WithContext(ctx).Save(comment).Error; err != nil {
+	// Select를 사용하여 Content 필드를 명시적으로 업데이트 대상에 포함시킵니다.
+	// 이렇게 하면 빈 문자열("")도 정상적으로 업데이트됩니다.
+	if err := r.db.WithContext(ctx).Model(comment).
+		Select("Content").
+		Updates(comment).Error; err != nil {
 		return fmt.Errorf("댓글 수정 실패: %w", err)
 	}
 	return nil

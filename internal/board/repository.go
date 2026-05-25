@@ -2,6 +2,7 @@ package board
 
 import (
 	"context"
+	"fmt"
 	"golangToy2/internal/domain"
 
 	"gorm.io/gorm"
@@ -34,7 +35,14 @@ func (r *repository) FindByID(ctx context.Context, id uint) (*domain.Board, erro
 }
 
 func (r *repository) Update(ctx context.Context, board *domain.Board) error {
-	return r.db.Save(board).Error
+	// Select를 사용하여 Title과 Content 필드를 명시적으로 업데이트 대상에 포함시킵니다.
+	// 이렇게 하면 빈 문자열("")도 데이터베이스에 정상적으로 업데이트됩니다.
+	if err := r.db.WithContext(ctx).Model(board).
+		Select("Title", "Content").
+		Updates(board).Error; err != nil {
+		return fmt.Errorf("게시글 수정 실패: %w", err)
+	}
+	return nil
 }
 
 func (r *repository) Delete(ctx context.Context, id uint) error {
