@@ -8,7 +8,7 @@ import (
 type Board struct {
 	BoardID   uint      `gorm:"primaryKey;autoIncrement;column:board_id" json:"boardId"`
 	UserIdx   uint      `gorm:"column:user_idx;not null" json:"userIdx" binding:"required"`
-	User      User      `gorm:"foreignKey:UserIdx;references:UserIdx" json:"user,omitempty"`
+	User      *User     `gorm:"foreignKey:UserIdx;references:UserIdx" json:"user,omitempty"`
 	Title     string    `gorm:"type:varchar(200);not null;column:title" json:"title" binding:"required"`
 	Content   string    `gorm:"type:text;not null;column:content" json:"content" binding:"required"`
 	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime" json:"createdAt"`

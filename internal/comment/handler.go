@@ -28,20 +28,20 @@ func NewHandler(service Service) *Handler {
 // @Success 200 {object} common.Response
 // @Router /comments [post]
 func (h *Handler) CreateComment(ctx *gin.Context) {
-	var comment domain.Comment
-	if err := ctx.ShouldBindJSON(&comment); err != nil {
+	var c domain.Comment
+	if err := ctx.ShouldBindJSON(&c); err != nil {
 		slog.Warn("댓글 등록 바인딩 실패", "error", err)
 		ctx.JSON(http.StatusBadRequest, common.NewResponse(false, "잘못된 요청 형식입니다.", nil))
 		return
 	}
 
-	if err := h.service.CreateComment(ctx.Request.Context(), &comment); err != nil {
+	if err := h.service.CreateComment(ctx.Request.Context(), &c); err != nil {
 		slog.Error("댓글 등록 실패", "error", err)
 		ctx.JSON(http.StatusInternalServerError, common.NewResponse(false, "댓글 등록 중 오류가 발생했습니다.", nil))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, common.NewResponse(true, "댓글이 성공적으로 등록되었습니다.", comment))
+	ctx.JSON(http.StatusOK, common.NewResponse(true, "댓글이 성공적으로 등록되었습니다.", c))
 }
 
 // GetCommentsByBoard godoc
@@ -93,21 +93,21 @@ func (h *Handler) UpdateComment(ctx *gin.Context) {
 		return
 	}
 
-	var comment domain.Comment
-	if err := ctx.ShouldBindJSON(&comment); err != nil {
+	var c domain.Comment
+	if err := ctx.ShouldBindJSON(&c); err != nil {
 		slog.Warn("댓글 수정 바인딩 실패", "error", err)
 		ctx.JSON(http.StatusBadRequest, common.NewResponse(false, "잘못된 요청 형식입니다.", nil))
 		return
 	}
-	comment.CommentID = uint(id)
+	c.CommentID = uint(id)
 
-	if err := h.service.UpdateComment(ctx.Request.Context(), &comment); err != nil {
+	if err := h.service.UpdateComment(ctx.Request.Context(), &c); err != nil {
 		slog.Error("댓글 수정 실패", "id", id, "error", err)
 		ctx.JSON(http.StatusInternalServerError, common.NewResponse(false, "댓글 수정 중 오류가 발생했습니다.", nil))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, common.NewResponse(true, "댓글 정보가 수정되었습니다.", comment))
+	ctx.JSON(http.StatusOK, common.NewResponse(true, "댓글 정보가 수정되었습니다.", c))
 }
 
 // DeleteComment godoc

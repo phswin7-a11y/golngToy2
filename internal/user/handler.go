@@ -28,20 +28,20 @@ func NewHandler(service Service) *Handler {
 // @Success 200 {object} common.Response
 // @Router /users [post]
 func (h *Handler) RegisterUser(ctx *gin.Context) {
-	var user domain.User
-	if err := ctx.ShouldBindJSON(&user); err != nil {
+	var u domain.User
+	if err := ctx.ShouldBindJSON(&u); err != nil {
 		slog.Warn("사용자 등록 바인딩 실패", "error", err)
 		ctx.JSON(http.StatusBadRequest, common.NewResponse(false, "잘못된 요청 형식입니다.", nil))
 		return
 	}
 
-	if err := h.service.RegisterUser(ctx.Request.Context(), &user); err != nil {
+	if err := h.service.RegisterUser(ctx.Request.Context(), &u); err != nil {
 		slog.Error("사용자 등록 실패", "error", err)
 		ctx.JSON(http.StatusInternalServerError, common.NewResponse(false, "사용자 등록 중 오류가 발생했습니다.", nil))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, common.NewResponse(true, "사용자가 성공적으로 등록되었습니다.", user))
+	ctx.JSON(http.StatusOK, common.NewResponse(true, "사용자가 성공적으로 등록되었습니다.", u))
 }
 
 // GetUser godoc
@@ -60,14 +60,14 @@ func (h *Handler) GetUser(ctx *gin.Context) {
 		return
 	}
 
-	user, err := h.service.GetUser(ctx.Request.Context(), uint(idx))
+	u, err := h.service.GetUser(ctx.Request.Context(), uint(idx))
 	if err != nil {
 		slog.Error("사용자 조회 실패", "idx", idx, "error", err)
 		ctx.JSON(http.StatusNotFound, common.NewResponse(false, "사용자를 찾을 수 없습니다.", nil))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, common.NewResponse(true, "사용자 조회가 완료되었습니다.", user))
+	ctx.JSON(http.StatusOK, common.NewResponse(true, "사용자 조회가 완료되었습니다.", u))
 }
 
 // GetUsers godoc
@@ -111,21 +111,21 @@ func (h *Handler) UpdateUser(ctx *gin.Context) {
 		return
 	}
 
-	var user domain.User
-	if err := ctx.ShouldBindJSON(&user); err != nil {
+	var u domain.User
+	if err := ctx.ShouldBindJSON(&u); err != nil {
 		slog.Warn("사용자 수정 바인딩 실패", "error", err)
 		ctx.JSON(http.StatusBadRequest, common.NewResponse(false, "잘못된 요청 형식입니다.", nil))
 		return
 	}
-	user.UserIdx = uint(idx)
+	u.UserIdx = uint(idx)
 
-	if err := h.service.UpdateUser(ctx.Request.Context(), &user); err != nil {
+	if err := h.service.UpdateUser(ctx.Request.Context(), &u); err != nil {
 		slog.Error("사용자 수정 실패", "idx", idx, "error", err)
 		ctx.JSON(http.StatusInternalServerError, common.NewResponse(false, "사용자 수정 중 오류가 발생했습니다.", nil))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, common.NewResponse(true, "사용자 정보가 수정되었습니다.", user))
+	ctx.JSON(http.StatusOK, common.NewResponse(true, "사용자 정보가 수정되었습니다.", u))
 }
 
 // DeleteUser godoc

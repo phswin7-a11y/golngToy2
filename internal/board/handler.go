@@ -28,20 +28,20 @@ func NewHandler(service Service) *Handler {
 // @Success 200 {object} common.Response
 // @Router /boards [post]
 func (h *Handler) CreateBoard(ctx *gin.Context) {
-	var board domain.Board
-	if err := ctx.ShouldBindJSON(&board); err != nil {
+	var b domain.Board
+	if err := ctx.ShouldBindJSON(&b); err != nil {
 		slog.Warn("게시글 등록 바인딩 실패", "error", err)
 		ctx.JSON(http.StatusBadRequest, common.NewResponse(false, "잘못된 요청 형식입니다.", nil))
 		return
 	}
 
-	if err := h.service.CreateBoard(ctx.Request.Context(), &board); err != nil {
+	if err := h.service.CreateBoard(ctx.Request.Context(), &b); err != nil {
 		slog.Error("게시글 등록 실패", "error", err)
 		ctx.JSON(http.StatusInternalServerError, common.NewResponse(false, "게시글 등록 중 오류가 발생했습니다.", nil))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, common.NewResponse(true, "게시글이 성공적으로 등록되었습니다.", board))
+	ctx.JSON(http.StatusOK, common.NewResponse(true, "게시글이 성공적으로 등록되었습니다.", b))
 }
 
 // GetBoard godoc
@@ -60,14 +60,14 @@ func (h *Handler) GetBoard(ctx *gin.Context) {
 		return
 	}
 
-	board, err := h.service.GetBoard(ctx.Request.Context(), uint(id))
+	res, err := h.service.GetBoard(ctx.Request.Context(), uint(id))
 	if err != nil {
 		slog.Error("게시글 조회 실패", "id", id, "error", err)
 		ctx.JSON(http.StatusNotFound, common.NewResponse(false, "게시글을 찾을 수 없습니다.", nil))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, common.NewResponse(true, "게시글 조회가 완료되었습니다.", board))
+	ctx.JSON(http.StatusOK, common.NewResponse(true, "게시글 조회가 완료되었습니다.", res))
 }
 
 // GetBoards godoc
@@ -111,21 +111,21 @@ func (h *Handler) UpdateBoard(ctx *gin.Context) {
 		return
 	}
 
-	var board domain.Board
-	if err := ctx.ShouldBindJSON(&board); err != nil {
+	var b domain.Board
+	if err := ctx.ShouldBindJSON(&b); err != nil {
 		slog.Warn("게시글 수정 바인딩 실패", "error", err)
 		ctx.JSON(http.StatusBadRequest, common.NewResponse(false, "잘못된 요청 형식입니다.", nil))
 		return
 	}
-	board.BoardID = uint(id)
+	b.BoardID = uint(id)
 
-	if err := h.service.UpdateBoard(ctx.Request.Context(), &board); err != nil {
+	if err := h.service.UpdateBoard(ctx.Request.Context(), &b); err != nil {
 		slog.Error("게시글 수정 실패", "id", id, "error", err)
 		ctx.JSON(http.StatusInternalServerError, common.NewResponse(false, "게시글 수정 중 오류가 발생했습니다.", nil))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, common.NewResponse(true, "게시글 정보가 수정되었습니다.", board))
+	ctx.JSON(http.StatusOK, common.NewResponse(true, "게시글 정보가 수정되었습니다.", b))
 }
 
 // DeleteBoard godoc
