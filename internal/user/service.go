@@ -6,10 +6,13 @@ import (
 	"golangToy2/internal/common"
 	"golangToy2/internal/domain"
 	"math"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Service interface {
 	RegisterUser(ctx context.Context, user *domain.User) error
+	Login(ctx context.Context, userID, password string) (string, string, error)
 	GetUser(ctx context.Context, idx uint) (*domain.User, error)
 	GetUsers(ctx context.Context, page, size int) (*common.PageResponse, error)
 	UpdateUser(ctx context.Context, user *domain.User) error
@@ -25,10 +28,37 @@ func NewService(repo Repository) Service {
 }
 
 func (s *service) RegisterUser(ctx context.Context, user *domain.User) error {
+	// 비밀번호 해싱
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("service - 비밀번호 해싱 실패: %w", err)
+	}
+	user.Password = string(hashedPassword)
+
 	if err := s.repo.Create(ctx, user); err != nil {
 		return fmt.Errorf("service - 사용자 등록 실패: %w", err)
 	}
 	return nil
+}
+
+func (s *service) Login(ctx context.Context, userID, password string) (string, string, error) {
+	user, err := s.repo.FindByUserID(ctx, userID)
+	if err != nil {
+		return "", "", fmt.Errorf("service - 사용자 조회 실패: %w", err)
+	}
+
+	// 비밀번호 확인
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		return "", "", fmt.Errorf("service - 비밀번호가 일치하지 않습니다")
+	}
+
+	// 토큰 생성
+	accessToken, refreshToken, err := common.GenerateToken(user.UserIdx, user.UserID)
+	if err != nil {
+		return "", "", fmt.Errorf("service - 토큰 생성 실패: %w", err)
+	}
+
+	return accessToken, refreshToken, nil
 }
 
 func (s *service) GetUser(ctx context.Context, idx uint) (*domain.User, error) {

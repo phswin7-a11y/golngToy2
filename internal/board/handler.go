@@ -138,7 +138,7 @@ func (h *Handler) UpdateBoard(ctx *gin.Context) {
 // @Router /boards/{id} [delete]
 func (h *Handler) DeleteBoard(ctx *gin.Context) {
 	idStr := ctx.Param("id")
-	id, err := strconv.Atoi(idStr)
+	id, err := strconv.Atoi(idStr)// strconv.Atoi는 문자열을 정수로 변환하는 함수입니다. 여기서는 URL 경로에서 게시글 ID를 추출하여 정수로 변환하는 데 사용됩니다.
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, common.NewResponse(false, "잘못된 ID 형식입니다.", nil))
 		return
