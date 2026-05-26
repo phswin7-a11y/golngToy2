@@ -44,6 +44,48 @@ func (h *Handler) RegisterUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, common.NewResponse(true, "사용자가 성공적으로 등록되었습니다.", u))
 }
 
+type loginRequest struct {
+	UserID   string `json:"userId" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type loginResponse struct {
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
+}
+
+// Login godoc
+// @Summary 로그인
+// @Description 사용자 아이디와 비밀번호로 로그인합니다.
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param login body loginRequest true "로그인 정보"
+// @Success 200 {object} common.Response
+// @Router /login [post]
+func (h *Handler) Login(ctx *gin.Context) {
+	var req loginRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		slog.Warn("로그인 바인딩 실패", "error", err)
+		ctx.JSON(http.StatusBadRequest, common.NewResponse(false, "잘못된 요청 형식입니다.", nil))
+		return
+	}
+
+	at, rt, err := h.service.Login(ctx.Request.Context(), req.UserID, req.Password)
+	if err != nil {
+		slog.Error("로그인 실패", "userId", req.UserID, "error", err)
+		ctx.JSON(http.StatusUnauthorized, common.NewResponse(false, "로그인에 실패했습니다. 아이디 또는 비밀번호를 확인해주세요.", nil))
+		return
+	}
+
+	res := loginResponse{
+		AccessToken:  at,
+		RefreshToken: rt,
+	}
+
+	ctx.JSON(http.StatusOK, common.NewResponse(true, "로그인 성공", res))
+}
+
 // GetUser godoc
 // @Summary 사용자 조회
 // @Description IDX를 통해 사용자를 조회합니다.
